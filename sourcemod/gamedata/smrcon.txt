@@ -1,0 +1,39 @@
+"Games"
+{
+	"#default"
+	{
+		"#supported"
+		{
+			"engine"	"orangebox_valve"
+		}
+		
+		"Offsets"
+		{
+			// Offset of the listeners CUtlLinkedList in CServerRemoteAccess
+			"RemoteListeners"
+			{
+				"windows"	"44"
+				"linux"		"44"
+			}
+		}
+		
+		"Signatures"
+		{
+			"WriteDataRequest"
+			{
+				"library"	"engine"
+				"windows"	"\x8B\x44\x24\x10\x81\xEC\x70\x03\x00\x00"
+			}
+			"IsPassword"
+			{
+				"library"	"engine"
+				"windows"	"\x56\x8D\x71\x40\x8B\xCE"
+			}
+			"CheckPassword"
+			{
+				"library"	"engine"
+				"windows"	"\x8B\x44\x24\x10\x55\x56\x8B\x74\x24\x0C"
+			}
+		}
+	}
+}

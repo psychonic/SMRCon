@@ -58,6 +58,8 @@ bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 	plsys->AddPluginsListener(this);
 
+	sharesys->AddNatives(myself, g_Natives);
+
 	return true;
 }
 

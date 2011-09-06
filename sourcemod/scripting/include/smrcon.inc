@@ -8,6 +8,8 @@ forward Action:SMRCon_OnAuth(rconId, const String:address[], const String:passwo
 
 forward Action:SMRCon_OnCommand(rconId, const String:address[], const String:command[], &bool:allow);
 
+forward SMRCon_OnDisconnect(rconId);
+
 /** Do Not Edit Below This Line **/
 
 public Extension:__ext_smrcon =

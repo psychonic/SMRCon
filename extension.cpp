@@ -41,6 +41,7 @@ SMEXT_LINK(&g_SMRCon);
 IGameConfig *g_pGameConf;
 IForward *g_fwdOnRConAuth;
 IForward *g_fwdOnRConCommand;
+IForward *g_fwdOnRConDisconnect;
 
 bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
@@ -53,6 +54,7 @@ bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 	g_fwdOnRConAuth = forwards->CreateForward("SMRCon_OnAuth", ET_Event, 4, NULL, Param_Cell, Param_String, Param_String, Param_CellByRef);
 	g_fwdOnRConCommand = forwards->CreateForward("SMRCon_OnCommand", ET_Event, 4, NULL, Param_Cell, Param_String, Param_String, Param_CellByRef);
+	g_fwdOnRConDisconnect = forwards->CreateForward("SMRCon_OnDisconnect", ET_Ignore, 1, NULL, Param_Cell);
 
 	plsys->AddPluginsListener(this);
 
@@ -67,6 +69,7 @@ void SMRCon::SDK_OnUnload()
 
 	forwards->ReleaseForward(g_fwdOnRConAuth);
 	forwards->ReleaseForward(g_fwdOnRConCommand);
+	forwards->ReleaseForward(g_fwdOnRConDisconnect);
 }
 
 void SMRCon::OnPluginLoaded(IPlugin *plugin)

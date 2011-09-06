@@ -11,6 +11,7 @@
 static CDetour *detWriteReq;
 static CDetour *detCheckPass;
 static CDetour *detIsPass;
+static CDetour *detSocketClosed;
 
 static int iRemoteListenersOffs;
 
@@ -128,6 +129,33 @@ DETOUR_DECL_MEMBER1(IsPassword, bool, const char *, password)
 	return DETOUR_MEMBER_CALL(IsPassword)(password);
 }
 
+/*
+ * RCon socket funcs from CRConServer vtable
+ * 0	CRConServer::ShouldAcceptSocket(int,netadr_s  const&)
+ * 1	CRConServer::OnSocketAccepted(int,netadr_s  const&,void **)
+ * 2	CRConServer::OnSocketClosed(int,netadr_s  const&,void *)
+ */
+
+DETOUR_DECL_MEMBER3(OnSocketClosed, void, int, unk, const netadr_s&, addr, void *, pSocketData)
+{
+	/*
+	 * From OnSocketAccepted, 2nd in vtable
+	 * Win:
+	 *   result = sub_1016E4B0(1, a2);
+     *   *(_DWORD *)(v3 + 8) = result;
+	 * Lin:
+	 *   *(_DWORD *)(v4 + 8) = CServerRemoteAccess::GetNextListenerID((int)g_ServerRemoteAccess, 1, a3);
+	 *
+	 * 8 is our magic number for the listener id
+	 */
+	listenerId_t id = *(int *)((intptr_t)pSocketData + 8);
+
+	g_fwdOnRConDisconnect->PushCell(id);
+	g_fwdOnRConDisconnect->Execute(NULL);
+
+	return DETOUR_MEMBER_CALL(OnSocketClosed)(unk, addr, pSocketData);
+}
+
 bool InitRConDetours()
 {
 	if (!g_pGameConf->GetOffset("RemoteListeners", &iRemoteListenersOffs))
@@ -157,21 +185,29 @@ bool InitRConDetours()
 		return false;
 	}
 
+	detSocketClosed = DETOUR_CREATE_MEMBER(OnSocketClosed, "OnSocketClosed");
+	if (detSocketClosed == NULL)
+	{
+		g_pSM->LogError(myself, "Error setting up OnSocketClosed detour");
+		return false;
+	}
+
 	detWriteReq->EnableDetour();
 	detCheckPass->EnableDetour();
 	detIsPass->EnableDetour();
+	detSocketClosed->EnableDetour();
 
 	return true;
 }
 
+#define KILL_DET(det) \
+	det->DisableDetour(); \
+	det = NULL;
+
 void RemoveRConDetours()
 {
-	detWriteReq->DisableDetour();
-	detWriteReq = NULL;
-
-	detCheckPass->DisableDetour();
-	detCheckPass = NULL;
-
-	detIsPass->DisableDetour();
-	detIsPass = NULL;
+	KILL_DET(detWriteReq);
+	KILL_DET(detCheckPass);
+	KILL_DET(detIsPass);
+	KILL_DET(detSocketClosed);
 }

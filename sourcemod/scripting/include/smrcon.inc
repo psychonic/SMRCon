@@ -10,6 +10,8 @@ forward Action:SMRCon_OnCommand(rconId, const String:address[], const String:com
 
 forward SMRCon_OnDisconnect(rconId);
 
+native bool:SMRCon_IsCmdFromRCon();
+
 /** Do Not Edit Below This Line **/
 
 public Extension:__ext_smrcon =
@@ -27,3 +29,10 @@ public Extension:__ext_smrcon =
 	required = 0,
 #endif
 };
+
+#if !defined REQUIRE_EXTENSIONS
+public __ext_smrcon_SetNTVOptional()
+{
+	MarkNativeAsOptional("SMRCon_IsCmdFromRCon");
+}
+#endif

@@ -15,6 +15,8 @@ static CDetour *detSocketClosed;
 
 static int iRemoteListenersOffs;
 
+static bool g_bInRConCommand = false;
+
 typedef unsigned int listenerId_t;
 static listenerId_t iLastListener;
 
@@ -89,11 +91,14 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 	g_fwdOnRConCommand->PushCellByRef(&allow);
 	g_fwdOnRConCommand->Execute(&res);
 
-	// plugin decided to immolate it
-	if (res > Pl_Continue && allow == 0)
-		return;
+	if (res == Pl_Continue || allow != 0)
+	{
+		g_bInRConCommand = true;
+		DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+		g_bInRConCommand = false;
+	}
 
-	return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+	
 }
 
 DETOUR_DECL_MEMBER4(CheckPassword, void, void *, pRCon, listenerId_t, id, int, reqId, const char *, password)
@@ -211,3 +216,14 @@ void RemoveRConDetours()
 	KILL_DET(detIsPass);
 	KILL_DET(detSocketClosed);
 }
+
+cell_t IsCmdFromRCon(IPluginContext *pContext, const cell_t *params)
+{
+	return (g_bInRConCommand) ? 1 : 0;
+}
+
+sp_nativeinfo_t g_Natives[] = 
+{
+	{"SMRCon_IsCmdFromRCon",	IsCmdFromRCon},
+	{NULL,						NULL},
+};

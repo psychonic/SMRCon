@@ -23,16 +23,19 @@
 			{
 				"library"	"engine"
 				"windows"	"\x8B\x44\x24\x10\x81\xEC\x70\x03\x00\x00"
+				"linux"		"@_ZN19CServerRemoteAccess16WriteDataRequestEP11CRConServerjPKvi"
 			}
 			"IsPassword"
 			{
 				"library"	"engine"
 				"windows"	"\x56\x8D\x71\x40\x8B\xCE"
+				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
 			}
 			"CheckPassword"
 			{
 				"library"	"engine"
 				"windows"	"\x8B\x44\x24\x10\x55\x56\x8B\x74\x24\x0C"
+				"linux"		"@_ZN19CServerRemoteAccess13CheckPasswordEP11CRConServerjiPKc"
 			}
 		}
 	}

@@ -60,6 +60,8 @@ bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 	sharesys->AddNatives(myself, g_Natives);
 
+	sharesys->RegisterLibrary(myself, "smrcon");
+
 	return true;
 }
 

@@ -18,3 +18,8 @@ public Action:SMRCon_OnCommand(rconId, const String:address[], const String:comm
 	
 	return Plugin_Continue;
 }
+
+public SMRCon_OnDisconnect(rconId)
+{
+	LogToGame("Session with rconId %d disconnected", rconId);
+}

@@ -131,6 +131,7 @@ private:
 
 extern IForward *g_fwdOnRConAuth;
 extern IForward *g_fwdOnRConCommand;
+extern IForward *g_fwdOnRConDisconnect;
 
 extern IGameConfig *g_pGameConf;
 

@@ -37,6 +37,12 @@
 				"windows"	"\x8B\x44\x24\x10\x55\x56\x8B\x74\x24\x0C"
 				"linux"		"@_ZN19CServerRemoteAccess13CheckPasswordEP11CRConServerjiPKc"
 			}
+			"OnSocketClosed"
+			{
+				"library"	"engine"
+				"windows"	"\x56\x8B\x2A\x2A\x2A\x85\xF6\xC6\x2A\x2A\x2A\x74\x2A\x8B"
+				"linux"		"@_ZN11CRConServer14OnSocketClosedEiRK8netadr_sPv"
+			}
 		}
 	}
 }

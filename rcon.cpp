@@ -43,7 +43,7 @@ inline listener_t GetListenerFromId(listenerId_t id)
 
 DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, const void *, pData, int, size)
 {
-	if (size < ((sizeof(int)*2) +sizeof(char)))
+	if (size < (int)((sizeof(int)*2) + sizeof(char)))
 	{
 		// we need to be able to read at least two ints and a string from this
 		return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);

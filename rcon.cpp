@@ -111,7 +111,8 @@ DETOUR_DECL_MEMBER1(IsPassword, bool, const char *, password)
 {
 	listener_t listener = GetListenerFromId(iLastListener);
 
-	cell_t bSuccess;
+	bool origRet = DETOUR_MEMBER_CALL(IsPassword)(password);
+	cell_t bSuccess = origRet ? 1 : 0;
 
 	cell_t res;
 	g_fwdOnRConAuth->PushCell(iLastListener);
@@ -128,7 +129,7 @@ DETOUR_DECL_MEMBER1(IsPassword, bool, const char *, password)
 			return true;
 	}
 
-	return DETOUR_MEMBER_CALL(IsPassword)(password);
+	return (bSuccess != 0);
 }
 
 /*

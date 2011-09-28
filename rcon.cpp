@@ -4,7 +4,6 @@
 
 // tier1 supremecy
 #include <bitbuf.h>
-#include <convar.h>
 #include <netadr.h>
 #include <utllinkedlist.h>
 
@@ -44,11 +43,17 @@ inline listener_t GetListenerFromId(listenerId_t id)
 
 DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, const void *, pData, int, size)
 {
+	if (size < ((sizeof(int)*2) +sizeof(char)))
+	{
+		// we need to be able to read at least two ints and a string from this
+		return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+	}
+
 	g_pServer = (CServerRemoteAccess *)(this);
 
 	listener_t listener = GetListenerFromId(id);
 
-	bf_read buffer(pData, 2048);
+	bf_read buffer(pData, size);
 
 	/*int reqId = */ buffer.ReadLong();
 	int type = buffer.ReadLong();
@@ -77,25 +82,25 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 
 	// Just because they're authed doesn't mean we'll let them do anything. Pass the info to sp
 	char command[512];
-	buffer.ReadString(command, sizeof(command)-1);
-	command[sizeof(command)-1] = 0;
-	
-	cell_t allow = 1;
-	cell_t res;
-	g_fwdOnRConCommand->PushCell(id);
-	g_fwdOnRConCommand->PushString((listener.hasAddr) ? listener.addr.ToString(true) : "");
-	g_fwdOnRConCommand->PushString(command);
-	g_fwdOnRConCommand->PushCellByRef(&allow);
-	g_fwdOnRConCommand->Execute(&res);
-
-	if (res == Pl_Continue || allow != 0)
+	if (buffer.ReadString(command, sizeof(command)-1))
 	{
-		g_bInRConCommand = true;
-		DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
-		g_bInRConCommand = false;
-	}
-
+		command[sizeof(command)-1] = 0;
 	
+		cell_t allow = 1;
+		cell_t res;
+		g_fwdOnRConCommand->PushCell(id);
+		g_fwdOnRConCommand->PushString((listener.hasAddr) ? listener.addr.ToString(true) : "");
+		g_fwdOnRConCommand->PushString(command);
+		g_fwdOnRConCommand->PushCellByRef(&allow);
+		g_fwdOnRConCommand->Execute(&res);
+
+		if (res == Pl_Continue || allow != 0)
+		{
+			g_bInRConCommand = true;
+			DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+			g_bInRConCommand = false;
+		}
+	}
 }
 
 DETOUR_DECL_MEMBER4(CheckPassword, void, void *, pRCon, listenerId_t, id, int, reqId, const char *, password)

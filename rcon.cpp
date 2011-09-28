@@ -48,9 +48,6 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 
 	listener_t listener = GetListenerFromId(id);
 
-	// shenanigans
-	assert(id == listener.id);
-
 	bf_read buffer(pData, 2048);
 
 	/*int reqId = */ buffer.ReadLong();

@@ -22,7 +22,7 @@ PROJECT = smrcon
 #Uncomment for Metamod: Source enabled extension
 #USEMETA = true
 
-OBJECTS = sdk/smsdk_ext.cpp extension.cpp rcon.cpp
+OBJECTS = sdk/smsdk_ext.cpp extension.cpp rcon.cpp CDetour/detours.cpp asm/asm.c
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###

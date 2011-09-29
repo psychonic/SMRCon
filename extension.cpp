@@ -42,6 +42,7 @@ IGameConfig *g_pGameConf;
 IForward *g_fwdOnRConAuth;
 IForward *g_fwdOnRConCommand;
 IForward *g_fwdOnRConDisconnect;
+IForward *g_fwdOnRConLog;
 
 bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
@@ -55,6 +56,7 @@ bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	g_fwdOnRConAuth = forwards->CreateForward("SMRCon_OnAuth", ET_Event, 4, NULL, Param_Cell, Param_String, Param_String, Param_CellByRef);
 	g_fwdOnRConCommand = forwards->CreateForward("SMRCon_OnCommand", ET_Event, 4, NULL, Param_Cell, Param_String, Param_String, Param_CellByRef);
 	g_fwdOnRConDisconnect = forwards->CreateForward("SMRCon_OnDisconnect", ET_Ignore, 1, NULL, Param_Cell);
+	g_fwdOnRConLog = forwards->CreateForward("SMRCon_OnLog", ET_Event, 3, NULL, Param_Cell, Param_String, Param_String);
 
 	plsys->AddPluginsListener(this);
 
@@ -74,14 +76,17 @@ void SMRCon::SDK_OnUnload()
 	forwards->ReleaseForward(g_fwdOnRConAuth);
 	forwards->ReleaseForward(g_fwdOnRConCommand);
 	forwards->ReleaseForward(g_fwdOnRConDisconnect);
+	forwards->ReleaseForward(g_fwdOnRConLog);
 }
 
 void SMRCon::OnPluginLoaded(IPlugin *plugin)
 {
+	// Could split this up, but all except disconnect are innerdependent
 	if (!m_bRConDetoursEnabled &&
 		(  g_fwdOnRConAuth->GetFunctionCount() > 0
 		|| g_fwdOnRConCommand->GetFunctionCount() > 0
 		|| g_fwdOnRConDisconnect->GetFunctionCount() > 0
+		|| g_fwdOnRConLog->GetFunctionCount() > 0
 		))
 	{
 		m_bRConDetoursEnabled = InitRConDetours();
@@ -94,6 +99,7 @@ void SMRCon::OnPluginUnloaded(IPlugin *plugin)
 		g_fwdOnRConAuth->GetFunctionCount() == 0
 		&& g_fwdOnRConCommand->GetFunctionCount() == 0
 		&& g_fwdOnRConDisconnect->GetFunctionCount() == 0
+		&& g_fwdOnRConLog->GetFunctionCount() == 0
 		)
 	{
 		RemoveRConDetours();

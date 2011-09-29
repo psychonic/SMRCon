@@ -26,6 +26,7 @@ static CDetour *detWriteReq;
 static CDetour *detCheckPass;
 static CDetour *detIsPass;
 static CDetour *detSocketClosed;
+static CDetour *detLogCommand;
 
 static int iRemoteListenersOffs;
 static CServerRemoteAccess *g_pServer;
@@ -41,6 +42,25 @@ inline listener_t GetListenerFromId(listenerId_t id)
 	return m_Listeners->Element(id);
 }
 
+DETOUR_DECL_MEMBER2(LogCommand, void, listenerId_t, id, const char *, data)
+{
+	g_pServer = (CServerRemoteAccess *)(this);
+
+	listener_t listener = GetListenerFromId(id);
+
+	cell_t res;
+	g_fwdOnRConLog->PushCell(id);
+	g_fwdOnRConLog->PushString((listener.hasAddr) ? listener.addr.ToString(true) : "");
+	g_fwdOnRConLog->PushString(data);
+	g_fwdOnRConLog->Execute(&res);
+
+	if (res == Pl_Continue)
+	{
+		return DETOUR_MEMBER_CALL(LogCommand)(id, data);
+	}
+
+	return;
+}
 
 DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, const void *, pData, int, size)
 {
@@ -93,6 +113,13 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 		g_bInRConCommand = true;
 		DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
 		g_bInRConCommand = false;
+	}
+	else
+	{
+		// we have to trigger logging on our own if we're not calling WriteDataRequest
+		char loginfo[512];
+		g_pSM->Format(loginfo, sizeof(loginfo), "command \"%s\" (rejected)", command);
+		DETOUR_MEMBER_MCALL_CALLBACK(LogCommand, this)(id, loginfo);
 	}
 }
 
@@ -193,10 +220,18 @@ bool InitRConDetours()
 		return false;
 	}
 
+	detLogCommand = DETOUR_CREATE_MEMBER(LogCommand, "LogCommand");
+	if (detLogCommand == NULL)
+	{
+		g_pSM->LogError(myself, "Error setting up LogCommand detour");
+		return false;
+	}
+
 	detWriteReq->EnableDetour();
 	detCheckPass->EnableDetour();
 	detIsPass->EnableDetour();
 	detSocketClosed->EnableDetour();
+	detLogCommand->EnableDetour();
 
 	return true;
 }
@@ -211,6 +246,7 @@ void RemoveRConDetours()
 	KILL_DET(detCheckPass);
 	KILL_DET(detIsPass);
 	KILL_DET(detSocketClosed);
+	KILL_DET(detLogCommand);
 }
 
 cell_t IsCmdFromRCon(IPluginContext *pContext, const cell_t *params)

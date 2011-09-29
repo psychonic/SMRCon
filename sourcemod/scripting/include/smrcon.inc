@@ -17,6 +17,10 @@ forward Action:SMRCon_OnAuth(rconId, const String:address[], const String:passwo
 /**
  * @brief Called when an RCon command is processed.
  *
+ * @note Rejection here does not count as a bad password attempt;
+ *       however, the RCon log line will be annotated in the form
+ *       of 'command (rejected) "%s"' rather than just 'command "%s"'
+ *
  * @param rconId	RCon listener ID, unique per session.
  * @param address	Originating IP address.
  * @param command	Command sent by RCon client.
@@ -32,6 +36,17 @@ forward Action:SMRCon_OnCommand(rconId, const String:address[], const String:com
  * @noreturn
  */
 forward SMRCon_OnDisconnect(rconId);
+
+/**
+ * @brief Called when an RCon log line is written
+ *
+ * @param rconId	RCon listener ID, unique per session.
+ * @param address	Originating IP address.
+ * @param logdata	Log data (usually either "Bad Password" or "command"
+ *                  followed by the command.
+ * @return			Plugin_Continue to log, Plugin_Handled to block.
+ */
+forward Action:SMRCon_OnLog(rconId, const String:address[], const String:logdata[]);
 
 /**
  * @brief Determines whether current server command originated from an RCon session.

@@ -48,6 +48,11 @@
 #define DETOUR_MEMBER_CALL(name) (this->*name##_Actual)
 #define DETOUR_STATIC_CALL(name) (name##_Actual)
 
+#define DETOUR_MEMBER_MCALL_CALLBACK(name, classptr) \
+	((name##Class *)classptr->*(&name##Class::name))
+#define DETOUR_MEMBER_MCALL_ORIGINAL(name, classptr) \
+	((name##Class *)classptr->*(&name##Class::name##_Actual))
+
 #define DETOUR_DECL_STATIC0(name, ret) \
 ret (*name##_Actual)(void) = NULL; \
 ret name(void)

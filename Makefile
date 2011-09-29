@@ -1,32 +1,16 @@
 # (C)2004-2010 SourceMod Development Team
 # Makefile written by David "BAILOPAN" Anderson
 
-###########################################
-### EDIT THESE PATHS FOR YOUR OWN SETUP ###
-###########################################
-
 SMSDK = ../../sourcemod-1.3
-HL2SDK_ORIG = ../../../hl2sdk
-HL2SDK_OB = ../../../hl2sdk-ob
+HL2SDK_ORIG = ../../hl2sdks/hl2sdk
+HL2SDK_OB = ../../hl2sdks/hl2sdk-ob
 HL2SDK_OB_VALVE = ../../hl2sdks/hl2sdk-ob-valve
-HL2SDK_L4D = ../../../hl2sdk-l4d
-HL2SDK_L4D2 = ../../../hl2sdk-l4d2
-#MMSOURCE18 = ../../../mmsource-1.8
-
-#####################################
-### EDIT BELOW FOR OTHER PROJECTS ###
-#####################################
+HL2SDK_L4D = ../../hl2sdks/hl2sdk-l4d
+HL2SDK_L4D2 = ../../hl2sdks/hl2sdk-l4d2
 
 PROJECT = smrcon
 
-#Uncomment for Metamod: Source enabled extension
-#USEMETA = true
-
 OBJECTS = sdk/smsdk_ext.cpp extension.cpp rcon.cpp CDetour/detours.cpp asm/asm.c
-
-##############################################
-### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
-##############################################
 
 C_OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe -fno-strict-aliasing
 C_DEBUG_FLAGS = -D_DEBUG -DDEBUG -g -ggdb3
@@ -73,12 +57,6 @@ endif
 
 HL2PUB = $(HL2SDK)/public
 
-ifeq "$(ENGINE)" "original"
-	INCLUDE += -I$(HL2SDK)/public/dlls
-else
-	INCLUDE += -I$(HL2SDK)/public/game/server
-endif
-
 OS := $(shell uname -s)
 
 ifeq "$(OS)" "Darwin"
@@ -101,13 +79,12 @@ else
 	LIB_SUFFIX = .$(LIB_EXT)
 endif
 
-INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
+INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn \
+	-I$(HL2PUB) -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1
 
 LINK_HL2 = $(HL2LIB)/tier1_i486.a $(LIB_PREFIX)vstdlib$(LIB_SUFFIX) $(LIB_PREFIX)tier0$(LIB_SUFFIX)
 
 LINK += $(LINK_HL2)
-
-INCLUDE += -I$(HL2PUB) -I$(HL2PUB)/engine -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1
 
 CFLAGS += -DSE_EPISODEONE=1 -DSE_DARKMESSIAH=2 -DSE_ORANGEBOX=3 -DSE_BLOODYGOODTIME=4 -DSE_EYE=5 \
 	-DSE_ORANGEBOXVALVE=6 -DSE_LEFT4DEAD=7 -DSE_LEFT4DEAD2=8 -DSE_ALIENSWARM=9
@@ -118,10 +95,6 @@ CFLAGS += -Dstricmp=strcasecmp -D_stricmp=strcasecmp -D_strnicmp=strncasecmp -Ds
 	-D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -Wall -Werror \
 	-Wno-switch -Wno-unused -mfpmath=sse -msse -DSOURCEMOD_BUILD -DHAVE_STDINT_H -m32
 CPPFLAGS += -Wno-non-virtual-dtor -fno-exceptions -fno-rtti
-
-################################################
-### DO NOT EDIT BELOW HERE FOR MOST PROJECTS ###
-################################################
 
 BINARY = $(PROJECT).ext$(BINADD).$(LIB_EXT)
 
@@ -158,6 +131,7 @@ $(BIN_DIR)/%.o: %.cpp
 
 all: check
 	mkdir -p $(BIN_DIR)/sdk
+	mkdir -p $(BIN_DIR)/CDetour
 	ln -sf $(HL2LIB)/$(LIB_PREFIX)vstdlib$(LIB_SUFFIX)
 	ln -sf $(HL2LIB)/$(LIB_PREFIX)tier0$(LIB_SUFFIX)
 	$(MAKE) -f Makefile extension

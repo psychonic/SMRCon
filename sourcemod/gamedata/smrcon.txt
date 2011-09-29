@@ -2,11 +2,6 @@
 {
 	"#default"
 	{
-		"#supported"
-		{
-			"engine"	"orangebox_valve"
-		}
-		
 		"Offsets"
 		{
 			// Offset of the listeners CUtlLinkedList in CServerRemoteAccess
@@ -22,19 +17,19 @@
 			"WriteDataRequest"
 			{
 				"library"	"engine"
-				"windows"	"\x8B\x44\x24\x10\x81\xEC\x70\x03\x00\x00"
+				"windows"	"\x8B\x44\x24\x10\x81\xEC\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x01"
 				"linux"		"@_ZN19CServerRemoteAccess16WriteDataRequestEP11CRConServerjPKvi"
 			}
 			"IsPassword"
 			{
 				"library"	"engine"
-				"windows"	"\x56\x8D\x71\x40\x8B\xCE"
+				"windows"	"\x56\x8D\x71\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x85"
 				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
 			}
 			"CheckPassword"
 			{
 				"library"	"engine"
-				"windows"	"\x8B\x44\x24\x10\x55\x56\x8B\x74\x24\x0C"
+				"windows"	"\x8B\x2A\x2A\x2A\x55\x56\x8B\x2A\x2A\x2A\x8B\xE9\x50\x8B"
 				"linux"		"@_ZN19CServerRemoteAccess13CheckPasswordEP11CRConServerjiPKc"
 			}
 			"OnSocketClosed"
@@ -42,6 +37,42 @@
 				"library"	"engine"
 				"windows"	"\x56\x8B\x2A\x2A\x2A\x85\xF6\xC6\x2A\x2A\x2A\x74\x2A\x8B"
 				"linux"		"@_ZN11CRConServer14OnSocketClosedEiRK8netadr_sPv"
+			}
+		}
+	}
+	
+	"#default"
+	{
+		"#supported"
+		{
+			"engine"	"orangebox_valve"
+		}
+		
+		"Signatures"
+		{
+			"LogCommand"
+			{
+				"library"	"engine"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x83\x78\x2A\x00\x74\x2A\x8B\x2A\x2A\x2A\x3B\x41\x2A\x73\x2A\x8D"
+				"linux"		"@_ZN19CServerRemoteAccess10LogCommandEjPKc"
+			}
+		}
+	}
+	
+	"#default"
+	{
+		"#supported"
+		{
+			"engine"	"left4dead2"
+		}
+		
+		"Signatures"
+		{
+			"LogCommand"
+			{
+				"library"	"engine"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x83\x78\x2A\x00\x57\x8B\xF9\x0F\x2A\x2A\x2A\x2A\x2A\x8B"
+				"linux"		"@_ZN19CServerRemoteAccess10LogCommandEjPKc"
 			}
 		}
 	}

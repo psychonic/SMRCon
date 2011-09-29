@@ -79,7 +79,10 @@ void SMRCon::SDK_OnUnload()
 void SMRCon::OnPluginLoaded(IPlugin *plugin)
 {
 	if (!m_bRConDetoursEnabled &&
-		(g_fwdOnRConAuth->GetFunctionCount() > 0 || g_fwdOnRConCommand->GetFunctionCount() > 0))
+		(  g_fwdOnRConAuth->GetFunctionCount() > 0
+		|| g_fwdOnRConCommand->GetFunctionCount() > 0
+		|| g_fwdOnRConDisconnect->GetFunctionCount() > 0
+		))
 	{
 		m_bRConDetoursEnabled = InitRConDetours();
 	}
@@ -88,7 +91,10 @@ void SMRCon::OnPluginLoaded(IPlugin *plugin)
 void SMRCon::OnPluginUnloaded(IPlugin *plugin)
 {
 	if (m_bRConDetoursEnabled &&
-		g_fwdOnRConAuth->GetFunctionCount() == 0 && g_fwdOnRConCommand->GetFunctionCount() == 0)
+		g_fwdOnRConAuth->GetFunctionCount() == 0
+		&& g_fwdOnRConCommand->GetFunctionCount() == 0
+		&& g_fwdOnRConDisconnect->GetFunctionCount() == 0
+		)
 	{
 		RemoveRConDetours();
 		m_bRConDetoursEnabled = false;

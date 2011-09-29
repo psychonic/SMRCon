@@ -7,17 +7,7 @@
 #include <netadr.h>
 #include <utllinkedlist.h>
 
-static CDetour *detWriteReq;
-static CDetour *detCheckPass;
-static CDetour *detIsPass;
-static CDetour *detSocketClosed;
-
-static int iRemoteListenersOffs;
-
-static bool g_bInRConCommand = false;
-
 typedef unsigned int listenerId_t;
-static listenerId_t iLastListener;
 
 struct listener_t
 {
@@ -29,7 +19,20 @@ struct listener_t
 
 class CServerRemoteAccess;
 
+#define SERVERDATA_EXECCOMMAND 2
+#define SERVERDATA_AUTH 3
+
+static CDetour *detWriteReq;
+static CDetour *detCheckPass;
+static CDetour *detIsPass;
+static CDetour *detSocketClosed;
+
+static int iRemoteListenersOffs;
 static CServerRemoteAccess *g_pServer;
+
+static bool g_bInRConCommand = false;
+static listenerId_t iLastListener;
+
 
 inline listener_t GetListenerFromId(listenerId_t id)
 {
@@ -38,20 +41,18 @@ inline listener_t GetListenerFromId(listenerId_t id)
 	return m_Listeners->Element(id);
 }
 
-#define SERVERDATA_EXECCOMMAND 2
-#define SERVERDATA_AUTH 3
 
 DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, const void *, pData, int, size)
 {
+	g_pServer = (CServerRemoteAccess *)(this);
+
+	listener_t listener = GetListenerFromId(id);
+
 	if (size < (int)((sizeof(int)*2) + sizeof(char)))
 	{
 		// we need to be able to read at least two ints and a string from this
 		return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
 	}
-
-	g_pServer = (CServerRemoteAccess *)(this);
-
-	listener_t listener = GetListenerFromId(id);
 
 	bf_read buffer(pData, size);
 
@@ -156,7 +157,7 @@ DETOUR_DECL_MEMBER3(OnSocketClosed, void, int, unk, const netadr_s&, addr, void 
 	 *
 	 * 8 is our magic number for the listener id
 	 */
-	listenerId_t id = *(int *)((intptr_t)pSocketData + 8);
+	listenerId_t id = *(listenerId_t *)((intptr_t)pSocketData + 8);
 
 	g_fwdOnRConDisconnect->PushCell(id);
 	g_fwdOnRConDisconnect->Execute(NULL);

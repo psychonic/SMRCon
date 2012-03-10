@@ -2,6 +2,7 @@
 # Makefile written by David "BAILOPAN" Anderson
 
 SMSDK = ../../sourcemod-1.3
+MMSDK = ../../mmsource-1.8
 HL2SDK_ORIG = ../../hl2sdks/hl2sdk
 HL2SDK_OB = ../../hl2sdks/hl2sdk-ob
 HL2SDK_OB_VALVE = ../../hl2sdks/hl2sdk-ob-valve
@@ -80,7 +81,7 @@ else
 endif
 
 INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn \
-	-I$(HL2PUB) -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1
+	-I$(HL2PUB) -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1 -I$(MMSDK)/core -I$(MMSDK)/core/sourcehook
 
 LINK_HL2 = $(HL2LIB)/tier1_i486.a $(LIB_PREFIX)vstdlib$(LIB_SUFFIX) $(LIB_PREFIX)tier0$(LIB_SUFFIX)
 

@@ -38,6 +38,7 @@
  */
 
 #include "smsdk_ext.h"
+#include <extensions/IBinTools.h>
 
 
 /**
@@ -45,7 +46,7 @@
  * Note: Uncomment one of the pre-defined virtual functions in order to use it.
  */
 class SMRCon : public SDKExtension,
-	IPluginsListener
+	IConCommandBaseAccessor
 {
 public:
 	/**
@@ -67,7 +68,7 @@ public:
 	 * @brief This is called once all known extensions have been loaded.
 	 * Note: It is is a good idea to add natives here, if any are provided.
 	 */
-	//virtual void SDK_OnAllLoaded();
+	virtual void SDK_OnAllLoaded();
 
 	/**
 	 * @brief Called when the pause state is changed.
@@ -92,7 +93,7 @@ public:
 	 * @param late			Whether or not Metamod considers this a late load.
 	 * @return				True to succeed, false to fail.
 	 */
-	//virtual bool SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlength, bool late);
+	virtual bool SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlength, bool late);
 
 	/**
 	 * @brief Called when Metamod is detaching, after the extension version is called.
@@ -115,18 +116,8 @@ public:
 	 */
 	//virtual bool SDK_OnMetamodPauseChange(bool paused, char *error, size_t maxlength);
 #endif
-public: // IPluginsListener
-	/**
-	* @brief Called when a plugin is fully loaded successfully.
-	*/
-	virtual void OnPluginLoaded(IPlugin *plugin);
-	/**
-	* @brief Called when a plugin is unloaded (only if fully loaded).
-	*/
-	virtual void OnPluginUnloaded(IPlugin *plugin);
-
-private:
-	bool m_bRConDetoursEnabled;
+public:  // IConCommandBaseAccessor
+	virtual bool RegisterConCommandBase(ConCommandBase *pVar);
 };
 
 extern IForward *g_fwdOnRConAuth;
@@ -134,6 +125,11 @@ extern IForward *g_fwdOnRConCommand;
 extern IForward *g_fwdOnRConDisconnect;
 extern IForward *g_fwdOnRConLog;
 
+extern CGlobalVars *gpGlobals;
+extern ICvar *icvar;
+
 extern IGameConfig *g_pGameConf;
+
+extern IBinTools *g_pBinTools;
 
 #endif // _INCLUDE_SOURCEMOD_EXTENSION_PROPER_H_

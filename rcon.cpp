@@ -6,6 +6,7 @@
 #include <bitbuf.h>
 #include <netadr.h>
 #include <utllinkedlist.h>
+#include <convar.h>
 
 typedef unsigned int listenerId_t;
 
@@ -34,12 +35,47 @@ static CServerRemoteAccess *g_pServer;
 static bool g_bInRConCommand = false;
 static listenerId_t iLastListener;
 
+ConVar smrcon_rejectbanned( "smrcon_rejectbanned", "1", 0 );
 
-inline listener_t GetListenerFromId(listenerId_t id)
+
+static inline listener_t GetListenerFromId(listenerId_t id)
 {
 	CUtlLinkedList<listener_t, listenerId_t> *m_Listeners = (CUtlLinkedList<listener_t, listenerId_t> *)((intptr_t)g_pServer + iRemoteListenersOffs);
 
 	return m_Listeners->Element(id);
+}
+
+static bool IsAddressBanned(const netadr_s &address)
+{
+	static ICallWrapper *pWrapper = NULL;
+	if (!pWrapper)
+	{
+		void *addr;
+		if (!g_pGameConf->GetMemSig("Filter_ShouldDiscard", &addr) || !addr)
+		{
+			return false;
+		}
+		
+		PassInfo pass[2];
+		pass[0].flags = PASSFLAG_BYREF;
+		pass[0].size = sizeof(netadr_s *);
+		pass[0].type = PassType_Basic;
+		pass[1].flags = PASSFLAG_BYVAL;
+		pass[1].size = sizeof(bool);
+		pass[1].type = PassType_Basic;
+
+		pWrapper = g_pBinTools->CreateCall(addr, CallConv_Cdecl, &pass[1], pass, 1);
+	}
+
+	unsigned char vstk[sizeof(netadr_s *)];
+	unsigned char *vptr = vstk;
+
+	*(netadr_s *)vptr = address;
+
+	bool ret;
+	pWrapper->Execute(vstk, &ret);
+
+	return ret;
 }
 
 DETOUR_DECL_MEMBER2(LogCommand, void, listenerId_t, id, const char *, data)
@@ -135,6 +171,11 @@ DETOUR_DECL_MEMBER4(CheckPassword, void, void *, pRCon, listenerId_t, id, int, r
 DETOUR_DECL_MEMBER1(IsPassword, bool, const char *, password)
 {
 	listener_t listener = GetListenerFromId(iLastListener);
+
+	if (smrcon_rejectbanned.GetBool() && IsAddressBanned(listener.addr))
+	{
+		return false;
+	}
 
 	bool origRet = DETOUR_MEMBER_CALL(IsPassword)(password);
 	cell_t bSuccess = origRet ? 1 : 0;

@@ -31,6 +31,7 @@
 
 #include "extension.h"
 #include "rcon.h"
+#include <compat_wrappers.h>
 
 #include "CDetour/detours.h"
 
@@ -38,6 +39,9 @@ SMRCon g_SMRCon;		/**< Global singleton for extension's main interface */
 
 SMEXT_LINK(&g_SMRCon);
 
+ICvar *icvar;
+CGlobalVars *gpGlobals;
+IBinTools *g_pBinTools;
 IGameConfig *g_pGameConf;
 IForward *g_fwdOnRConAuth;
 IForward *g_fwdOnRConCommand;
@@ -58,52 +62,46 @@ bool SMRCon::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	g_fwdOnRConDisconnect = forwards->CreateForward("SMRCon_OnDisconnect", ET_Ignore, 1, NULL, Param_Cell);
 	g_fwdOnRConLog = forwards->CreateForward("SMRCon_OnLog", ET_Event, 3, NULL, Param_Cell, Param_String, Param_String);
 
-	plsys->AddPluginsListener(this);
-
 	sharesys->AddNatives(myself, g_Natives);
+	sharesys->AddDependency(myself, "bintools.ext", false, true);
 
 	sharesys->RegisterLibrary(myself, "smrcon");
 
-	return true;
+	return InitRConDetours();
+}
+
+void SMRCon::SDK_OnAllLoaded()
+{
+	SM_GET_LATE_IFACE(BINTOOLS, g_pBinTools);
 }
 
 void SMRCon::SDK_OnUnload()
 {
 	gameconfs->CloseGameConfigFile(g_pGameConf);
 
-	plsys->RemovePluginsListener(this);
-
 	forwards->ReleaseForward(g_fwdOnRConAuth);
 	forwards->ReleaseForward(g_fwdOnRConCommand);
 	forwards->ReleaseForward(g_fwdOnRConDisconnect);
 	forwards->ReleaseForward(g_fwdOnRConLog);
+
+	RemoveRConDetours();
 }
 
-void SMRCon::OnPluginLoaded(IPlugin *plugin)
+bool SMRCon::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
-	// Could split this up, but all except disconnect are innerdependent
-	if (!m_bRConDetoursEnabled &&
-		(  g_fwdOnRConAuth->GetFunctionCount() > 0
-		|| g_fwdOnRConCommand->GetFunctionCount() > 0
-		|| g_fwdOnRConDisconnect->GetFunctionCount() > 0
-		|| g_fwdOnRConLog->GetFunctionCount() > 0
-		))
-	{
-		m_bRConDetoursEnabled = InitRConDetours();
-	}
+	gpGlobals = ismm->GetCGlobals();
+
+	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
+
+	g_pCVar = icvar;
+
+	CONVAR_REGISTER(this);
+
+	return true;
 }
 
-void SMRCon::OnPluginUnloaded(IPlugin *plugin)
+bool SMRCon::RegisterConCommandBase(ConCommandBase *pVar)
 {
-	if (m_bRConDetoursEnabled &&
-		g_fwdOnRConAuth->GetFunctionCount() == 0
-		&& g_fwdOnRConCommand->GetFunctionCount() == 0
-		&& g_fwdOnRConDisconnect->GetFunctionCount() == 0
-		&& g_fwdOnRConLog->GetFunctionCount() == 0
-		)
-	{
-		RemoveRConDetours();
-		m_bRConDetoursEnabled = false;
-
-	}
+	/* Always call META_REGCVAR instead of going through the engine. */
+	return META_REGCVAR(pVar);
 }

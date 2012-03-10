@@ -40,7 +40,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"SMRCon"
 #define SMEXT_CONF_DESCRIPTION	"Tools for SM plugins to interact with rcon auth and requests"
-#define SMEXT_CONF_VERSION		"1.1.0"
+#define SMEXT_CONF_VERSION		"1.2.0"
 #define SMEXT_CONF_AUTHOR		"psychonic"
 #define SMEXT_CONF_URL			"http://www.nicholashastings.com/"
 #define SMEXT_CONF_LOGTAG		"SMRCon"
@@ -56,7 +56,7 @@
  * @brief Sets whether or not this plugin required Metamod.
  * NOTE: Uncomment to enable, comment to disable.
  */
-//#define SMEXT_CONF_METAMOD		
+#define SMEXT_CONF_METAMOD		
 
 /** Enable interfaces you want to use here by uncommenting lines */
 #define SMEXT_ENABLE_FORWARDSYS

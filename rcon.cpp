@@ -80,11 +80,17 @@ static bool IsAddressBanned(const netadr_s &address)
 
 DETOUR_DECL_MEMBER2(LogCommand, void, listenerId_t, id, const char *, data)
 {
+	// in case this isn't already init'd
 	g_pServer = (CServerRemoteAccess *)(this);
+
+	if( g_fwdOnRConLog->GetFunctionCount() == 0 )
+	{
+		return DETOUR_MEMBER_CALL(LogCommand)(id, data);
+	}
 
 	listener_t listener = GetListenerFromId(id);
 
-	cell_t res;
+	cell_t res = Pl_Continue;
 	g_fwdOnRConLog->PushCell(id);
 	g_fwdOnRConLog->PushString((listener.hasAddr) ? listener.addr.ToString(true) : "");
 	g_fwdOnRConLog->PushString(data);
@@ -100,6 +106,7 @@ DETOUR_DECL_MEMBER2(LogCommand, void, listenerId_t, id, const char *, data)
 
 DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, const void *, pData, int, size)
 {
+	// in case this isn't already init'd
 	g_pServer = (CServerRemoteAccess *)(this);
 
 	listener_t listener = GetListenerFromId(id);
@@ -127,7 +134,6 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 		return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
 	}
 
-	// Just because they're authed doesn't mean we'll let them do anything. Pass the info to sp
 	char command[512];
 	if (!buffer.ReadString(command, sizeof(command)-1))
 	{
@@ -135,9 +141,15 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 	}
 
 	command[sizeof(command)-1] = 0;
+
+	// Just because they're authed doesn't mean we'll let them do anything. Pass the info to sp
+	if( g_fwdOnRConCommand->GetFunctionCount() == 0 )
+	{
+		return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+	}
 	
 	cell_t allow = 1;
-	cell_t res;
+	cell_t res = Pl_Continue;
 	g_fwdOnRConCommand->PushCell(id);
 	g_fwdOnRConCommand->PushString((listener.hasAddr) ? listener.addr.ToString(true) : "");
 	g_fwdOnRConCommand->PushString(command);
@@ -161,7 +173,9 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 
 DETOUR_DECL_MEMBER4(CheckPassword, void, void *, pRCon, listenerId_t, id, int, reqId, const char *, password)
 {
+	// in case this isn't already init'd
 	g_pServer = (CServerRemoteAccess *)(this);
+
 	iLastListener = id;
 
 	// IsPassword gets called inside of here
@@ -178,9 +192,14 @@ DETOUR_DECL_MEMBER1(IsPassword, bool, const char *, password)
 	}
 
 	bool origRet = DETOUR_MEMBER_CALL(IsPassword)(password);
+	if( g_fwdOnRConAuth->GetFunctionCount() == 0 )
+	{
+		return origRet;
+	}
+
 	cell_t bSuccess = origRet ? 1 : 0;
 
-	cell_t res;
+	cell_t res = Pl_Continue;
 	g_fwdOnRConAuth->PushCell(iLastListener);
 	g_fwdOnRConAuth->PushString((listener.hasAddr) ? listener.addr.ToString(true) : "");
 	g_fwdOnRConAuth->PushString(password);

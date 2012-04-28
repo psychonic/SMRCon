@@ -70,7 +70,7 @@ static bool IsAddressBanned(const netadr_s &address)
 	unsigned char vstk[sizeof(netadr_s *)];
 	unsigned char *vptr = vstk;
 
-	*(netadr_s *)vptr = address;
+	*(const netadr_s **)vptr = &address;
 
 	bool ret;
 	pWrapper->Execute(vstk, &ret);

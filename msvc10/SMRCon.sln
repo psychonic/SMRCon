@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SMRCon", "SMRCon.vcxproj", "{B3E797CF-4E77-4C9D-B8A8-7589B6902206}"
 EndProject
 Global
@@ -8,6 +8,7 @@ Global
 		Debug - Left 4 Dead 2|Win32 = Debug - Left 4 Dead 2|Win32
 		Debug - Orange Box Valve|Win32 = Debug - Orange Box Valve|Win32
 		Debug|Win32 = Debug|Win32
+		Release - CS GO|Win32 = Release - CS GO|Win32
 		Release - Left 4 Dead 2|Win32 = Release - Left 4 Dead 2|Win32
 		Release - Left 4 Dead|Win32 = Release - Left 4 Dead|Win32
 		Release - Orange Box Valve|Win32 = Release - Orange Box Valve|Win32
@@ -21,6 +22,8 @@ Global
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Orange Box Valve|Win32.Build.0 = Debug - Orange Box Valve|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug|Win32.Build.0 = Debug|Win32
+		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - CS GO|Win32.ActiveCfg = Release - CS GO|Win32
+		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - CS GO|Win32.Build.0 = Release - CS GO|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead 2|Win32.ActiveCfg = Release - Left 4 Dead 2|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead 2|Win32.Build.0 = Release - Left 4 Dead 2|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead|Win32.ActiveCfg = Release - Left 4 Dead|Win32

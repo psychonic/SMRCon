@@ -8,6 +8,7 @@ HL2SDK_OB = ../../hl2sdks/hl2sdk-ob
 HL2SDK_OB_VALVE = ../../hl2sdks/hl2sdk-ob-valve
 HL2SDK_L4D = ../../hl2sdks/hl2sdk-l4d
 HL2SDK_L4D2 = ../../hl2sdks/hl2sdk-l4d2
+HL2SDK_CSGO = ../../hl2sdks/hl2sdk-csgo
 
 PROJECT = smrcon
 
@@ -17,7 +18,7 @@ C_OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe -fno-strict-aliasing
 C_DEBUG_FLAGS = -D_DEBUG -DDEBUG -g -ggdb3
 C_GCC4_FLAGS = -fvisibility=hidden
 CPP_GCC4_FLAGS = -fvisibility-inlines-hidden
-CPP = /opt/crosstool/gcc-3.4.1-glibc-2.3.2/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-gcc
+CPP = gcc
 
 ##########################
 ### SDK CONFIGURATIONS ###
@@ -26,7 +27,7 @@ CPP = /opt/crosstool/gcc-3.4.1-glibc-2.3.2/i686-unknown-linux-gnu/bin/i686-unkno
 override ENGSET = false
 
 # Check for valid list of engines
-ifneq (,$(filter original orangebox orangeboxvalve left4dead left4dead2,$(ENGINE)))
+ifneq (,$(filter original orangebox orangeboxvalve left4dead left4dead2 csgo,$(ENGINE)))
 	override ENGSET = true
 endif
 
@@ -42,18 +43,23 @@ ifeq "$(ENGINE)" "orangebox"
 endif
 ifeq "$(ENGINE)" "orangeboxvalve"
 	HL2SDK = $(HL2SDK_OB_VALVE)
-	CFLAGS += -DSOURCE_ENGINE=6
+	CFLAGS += -DSOURCE_ENGINE=7
 	BINADD = .2.ep2v
 endif
 ifeq "$(ENGINE)" "left4dead"
 	HL2SDK = $(HL2SDK_L4D)
-	CFLAGS += -DSOURCE_ENGINE=7
+	CFLAGS += -DSOURCE_ENGINE=8
 	BINADD = .2.l4d
 endif
 ifeq "$(ENGINE)" "left4dead2"
 	HL2SDK = $(HL2SDK_L4D2)
-	CFLAGS += -DSOURCE_ENGINE=8
+	CFLAGS += -DSOURCE_ENGINE=9
 	BINADD = .2.l4d2
+endif
+ifeq "$(ENGINE)" "csgo"
+	HL2SDK = $(HL2SDK_CSGO)
+	CFLAGS += -DSOURCE_ENGINE=12
+	BINADD = .2.csgo
 endif
 
 HL2PUB = $(HL2SDK)/public
@@ -84,17 +90,22 @@ INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn \
 	-I$(HL2PUB) -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1 -I$(MMSDK)/core -I$(MMSDK)/core/sourcehook
 
 LINK_HL2 = $(HL2LIB)/tier1_i486.a $(LIB_PREFIX)vstdlib$(LIB_SUFFIX) $(LIB_PREFIX)tier0$(LIB_SUFFIX)
+ifeq "$(ENGINE)" "csgo"
+	LINK_HL2 += $(HL2LIB)/interfaces_i486.a
+endif
 
 LINK += $(LINK_HL2)
 
 CFLAGS += -DSE_EPISODEONE=1 -DSE_DARKMESSIAH=2 -DSE_ORANGEBOX=3 -DSE_BLOODYGOODTIME=4 -DSE_EYE=5 \
-	-DSE_ORANGEBOXVALVE=6 -DSE_LEFT4DEAD=7 -DSE_LEFT4DEAD2=8 -DSE_ALIENSWARM=9
+	-DSE_CSS=6 -DSE_ORANGEBOXVALVE=7 -DSE_LEFT4DEAD=8 -DSE_LEFT4DEAD2=9 -DSE_ALIENSWARM=10 \
+	-DSE_PORTAL2=11 -DSE_CSGO=12
 
 LINK += -m32 -lm -ldl
 
 CFLAGS += -Dstricmp=strcasecmp -D_stricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp \
 	-D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -Wall -Werror \
-	-Wno-switch -Wno-unused -mfpmath=sse -msse -DSOURCEMOD_BUILD -DHAVE_STDINT_H -m32
+	-Wno-switch -Wno-unused -mfpmath=sse -msse -DSOURCEMOD_BUILD -DHAVE_STDINT_H -DPOSIX \
+	-DCOMPILER_GCC -m32
 CPPFLAGS += -Wno-non-virtual-dtor -fno-exceptions -fno-rtti
 
 BINARY = $(PROJECT).ext$(BINADD).$(LIB_EXT)
@@ -133,14 +144,14 @@ $(BIN_DIR)/%.o: %.cpp
 all: check
 	mkdir -p $(BIN_DIR)/sdk
 	mkdir -p $(BIN_DIR)/CDetour
-	ln -sf $(HL2LIB)/$(LIB_PREFIX)vstdlib$(LIB_SUFFIX)
-	ln -sf $(HL2LIB)/$(LIB_PREFIX)tier0$(LIB_SUFFIX)
+	cp -f $(HL2LIB)/$(LIB_PREFIX)vstdlib$(LIB_SUFFIX) $(LIB_PREFIX)vstdlib$(LIB_SUFFIX)
+	cp -f $(HL2LIB)/$(LIB_PREFIX)tier0$(LIB_SUFFIX) $(LIB_PREFIX)tier0$(LIB_SUFFIX)
 	$(MAKE) -f Makefile extension
 
 check:
 	if [ "$(ENGSET)" = "false" ]; then \
 		echo "You must supply one of the following values for ENGINE:"; \
-		echo "left4dead2, left4dead, orangeboxvalve, orangebox, or original"; \
+		echo "csgo, left4dead2, left4dead, orangeboxvalve, orangebox, or original"; \
 		exit 1; \
 	fi
 

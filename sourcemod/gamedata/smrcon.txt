@@ -221,4 +221,17 @@
 			}
 		}
 	}
+	
+	"tf"
+	{
+		"Signatures"
+		{
+			"IsPassword"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x8B\x41\x2A\x83\xC1\x2A\x85\xC0\x74\x2A\x80\x38\x00\x74\x2A\xE8"
+				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
+			}
+		}
+	}
 }

@@ -55,8 +55,10 @@
 	{
 		"#supported"
 		{
-			"engine"	"orangebox_valve"
-			"engine"	"css"
+			"game"	"tf"
+			"game"	"cstrike"
+			"game"	"dod"
+			"game"	"hl2mp"
 		}
 		
 		"Signatures"
@@ -91,10 +93,42 @@
 				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x74\x2A\x8B\xCE\xE8"
 				"linux"		"@_ZN11CRConServer14OnSocketClosedEiRK8netadr_sPv"
 			}
+		}
+	}
+	
+	"#default"
+	{
+		"#supported"
+		{
+			"game"	"cstrike"
+			"game"	"dod"
+			"game"	"hl2mp"
+		}
+		
+		"Signatures"
+		{
 			"IsPassword"
 			{
 				"library"	"engine"
 				"windows"	"\x55\x8B\xEC\x56\x8D\x71\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x85\xC0\x75"
+				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
+			}
+		}
+	}
+	
+	"#default"
+	{
+		"#supported"
+		{
+			"game"	"tf"
+		}
+		
+		"Signatures"
+		{
+			"IsPassword"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x8B\x41\x2A\x83\xC1\x2A\x85\xC0\x74\x2A\x80\x38\x00\x74"
 				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
 			}
 		}

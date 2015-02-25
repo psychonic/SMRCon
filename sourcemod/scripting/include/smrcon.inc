@@ -12,7 +12,7 @@
  * @param allow		True to grant auth, false otherwise.
  * @return 			Plugin_Changed to use given allow value, Plugin_Continue to let engine process.
  */
-forward Action:SMRCon_OnAuth(rconId, const String:address[], const String:password[], &bool:allow);
+forward Action SMRCon_OnAuth(int rconId, const char[] address, const char[] password, bool &allow);
 
 /**
  * @brief Called when an RCon command is processed.
@@ -27,15 +27,14 @@ forward Action:SMRCon_OnAuth(rconId, const String:address[], const String:passwo
  * @param allow		True to allow command to be processed, false otherwise.
  * @return 			Plugin_Changed to use given allow value, Plugin_Continue to let engine process.
  */
-forward Action:SMRCon_OnCommand(rconId, const String:address[], const String:command[], &bool:allow);
+forward Action SMRCon_OnCommand(int rconId, const char[] address, const char[] command, bool &allow);
 
 /**
  * @brief Called when an RCon session is disconnected.
  *
  * @param rconId	RCon listener ID, unique per session.
- * @noreturn
  */
-forward SMRCon_OnDisconnect(rconId);
+forward void SMRCon_OnDisconnect(int rconId);
 
 /**
  * @brief Called when an RCon log line is written
@@ -46,19 +45,19 @@ forward SMRCon_OnDisconnect(rconId);
  *                  followed by the command.
  * @return			Plugin_Continue to log, Plugin_Handled to block.
  */
-forward Action:SMRCon_OnLog(rconId, const String:address[], const String:logdata[]);
+forward Action SMRCon_OnLog(int rconId, const char[] address, const char[] logdata);
 
 /**
  * @brief Determines whether current server command originated from an RCon session.
  *
  * @return 			True if command originated from RCon session, false if from console or not in server command callback.
  */
-native bool:SMRCon_IsCmdFromRCon();
+native bool SMRCon_IsCmdFromRCon();
 
 
 /** Do Not Edit Below This Line **/
 
-public Extension:__ext_smrcon =
+public Extension __ext_smrcon =
 {
 	name = "smrcon",
 	file = "smrcon.ext",
@@ -75,7 +74,7 @@ public Extension:__ext_smrcon =
 };
 
 #if !defined REQUIRE_EXTENSIONS
-public __ext_smrcon_SetNTVOptional()
+public void __ext_smrcon_SetNTVOptional()
 {
 	MarkNativeAsOptional("SMRCon_IsCmdFromRCon");
 }

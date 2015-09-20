@@ -100,27 +100,10 @@
 	{
 		"#supported"
 		{
+			"game"	"tf"
 			"game"	"cstrike"
 			"game"	"dod"
 			"game"	"hl2mp"
-		}
-		
-		"Signatures"
-		{
-			"IsPassword"
-			{
-				"library"	"engine"
-				"windows"	"\x55\x8B\xEC\x56\x8D\x71\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x85\xC0\x75"
-				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
-			}
-		}
-	}
-	
-	"#default"
-	{
-		"#supported"
-		{
-			"game"	"tf"
 		}
 		
 		"Signatures"

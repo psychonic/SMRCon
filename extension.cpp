@@ -89,11 +89,18 @@ void SMRCon::SDK_OnUnload()
 
 bool SMRCon::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
+	
+#if !defined METAMOD_PLAPI_VERSION
+	gpGlobals = ismm->pGlobals();
+	GET_V_IFACE_CURRENT(engineFactory, icvar, ICvar, VENGINE_CVAR_INTERFACE_VERSION);
+#else
 	gpGlobals = ismm->GetCGlobals();
-
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
+#endif
 
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 	g_pCVar = icvar;
+#endif
 
 	CONVAR_REGISTER(this);
 

@@ -1,36 +1,36 @@
-# vim: set ts=2 sw=2 tw=99 noet ft=python: 
-import os
+# vim: set sts=2 ts=8 sw=2 tw=99 et ft=python:
+import os, sys
 
-for i in SM.sdkInfo:
-	sdk = SM.sdkInfo[i]
-	if AMBuild.target['platform'] not in sdk['platform']:
-		continue
+projectName = 'smrcon'
 
-	compiler = SM.DefaultHL2Compiler('.', i)
-	compiler['CXXINCLUDES'].append(os.path.join(AMBuild.cache['SOURCEMOD16'], 'public'))
-	compiler['CXXINCLUDES'].append(os.path.join(AMBuild.cache['SOURCEMOD16'], 'public', 'sourcepawn'))
-	compiler['CXXINCLUDES'].append(os.path.join(AMBuild.cache['SOURCEMOD16'], 'public', 'extensions'))
-	#compiler['CXXINCLUDES'].append(os.path.join(AMBuild.cache['SOURCEMOD14'], 'public', 'jit'))
-	#compiler['CXXINCLUDES'].append(os.path.join(AMBuild.cache['SOURCEMOD14'], 'public', 'jit', 'x86'))
+# smsdk_ext.cpp will be automatically added later
+sourceFiles = [
+  'extension.cpp',
+  'rcon.cpp',
+]
 
-	if compiler.cc.name == 'gcc':
-		compiler['CFLAGS'].append('-Wno-parentheses')
+###############
+# Make sure to edit PackageScript, which copies your files to their appropriate locations
+# Simple extensions do not need to modify past this point.
 
-	#if i != 'ep1':
-	#	compiler['CDEFINES'].append('HOOKING_ENABLED')
+project = Extension.HL2Project(builder, projectName + '.ext')
 
-	name = 'smrcon.ext.' + sdk['ext']
-	extension = AMBuild.AddJob(name)
-	binary = Cpp.LibraryBuilder(name, AMBuild, extension, compiler)
-	SM.PreSetupHL2Job(extension, binary, i)
-	binary.AddSourceFiles('.', [
-		'extension.cpp',
-		'rcon.cpp',
-		'CDetour/detours.cpp',
-		'asm/asm.c',
-		'sdk/smsdk_ext.cpp'
-		])
-	SM.PostSetupHL2Job(extension, binary, i)
-	SM.AutoVersion('.', binary)
-	binary.SendToJob()
+# CDetour
+project.sources += [os.path.join(Extension.sm_root, 'public', 'CDetour', 'detours.cpp')]
+project.sources += [os.path.join(Extension.sm_root, 'public', 'asm', 'asm.c')]
 
+if os.path.isfile(os.path.join(builder.currentSourcePath, 'sdk', 'smsdk_ext.cpp')):
+  # Use the copy included in the project
+  project.sources += [os.path.join('sdk', 'smsdk_ext.cpp')]
+else:
+  # Use the copy included with SM 1.6 and newer
+  project.sources += [os.path.join(Extension.sm_root, 'public', 'smsdk_ext.cpp')]
+
+project.sources += sourceFiles
+  
+for sdk_name in Extension.sdks:
+  sdk = Extension.sdks[sdk_name]
+  
+  binary = Extension.HL2Config(project, projectName + '.ext.' + sdk.ext, sdk)
+
+Extension.extensions = builder.Add(project)

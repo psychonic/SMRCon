@@ -1,12 +1,27 @@
 #include "rcon.h"
 
-#include "CDetour/detours.h"
+#include <CDetour/detours.h>
 
 // tier1 supremecy
 #include <bitbuf.h>
 #include <netadr.h>
 #include <utllinkedlist.h>
 #include <convar.h>
+
+// Not sure how/where to best put this in amb file. #yolo
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32")
+#endif
+
+// I thought that these had made it upstream. I was wrong.
+#ifndef DETOUR_MEMBER_MCALL_CALLBACK
+#define DETOUR_MEMBER_MCALL_CALLBACK(name, classptr) \
+	((name##Class *)classptr->*(&name##Class::name))
+#endif
+#ifndef DETOUR_MEMBER_MCALL_ORIGINAL
+#define DETOUR_MEMBER_MCALL_ORIGINAL(name, classptr) \
+((name##Class *)classptr->*(&name##Class::name##_Actual))
+#endif
 
 typedef unsigned int listenerId_t;
 

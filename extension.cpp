@@ -33,7 +33,7 @@
 #include "rcon.h"
 #include <compat_wrappers.h>
 
-#include "CDetour/detours.h"
+#include <CDetour/detours.h>
 
 SMRCon g_SMRCon;		/**< Global singleton for extension's main interface */
 

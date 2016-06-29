@@ -47,6 +47,10 @@ static inline listener_t GetListenerFromId(listenerId_t id)
 
 static bool IsAddressBanned(const netadr_s &address)
 {
+#if SOURCE_ENGINE == SE_CSGO
+	ns_address address2(address);
+#endif
+	
 	static ICallWrapper *pWrapper = NULL;
 	if (!pWrapper)
 	{
@@ -58,7 +62,11 @@ static bool IsAddressBanned(const netadr_s &address)
 		
 		PassInfo pass[2];
 		pass[0].flags = PASSFLAG_BYREF;
+#if SOURCE_ENGINE == SE_CSGO
+		pass[0].size = sizeof(ns_address *);
+#else
 		pass[0].size = sizeof(netadr_s *);
+#endif
 		pass[0].type = PassType_Basic;
 		pass[1].flags = PASSFLAG_BYVAL;
 		pass[1].size = sizeof(bool);
@@ -70,7 +78,11 @@ static bool IsAddressBanned(const netadr_s &address)
 	unsigned char vstk[sizeof(netadr_s *)];
 	unsigned char *vptr = vstk;
 
+#if SOURCE_ENGINE == SE_CSGO
+	*(const ns_address **)vptr = &address2;
+#else
 	*(const netadr_s **)vptr = &address;
+#endif
 
 	bool ret;
 	pWrapper->Execute(vstk, &ret);

@@ -19,7 +19,6 @@
 		{
 			"engine"	"orangebox"
 			"engine"	"left4dead"
-			"engine"	"left4dead2"
 		}
 		
 		"Signatures"
@@ -47,6 +46,12 @@
 				"library"	"engine"
 				"windows"	"\x56\x8D\x71\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x85\xC0\x75"
 				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
+			}
+			"LogCommand"
+			{
+				"library"	"engine"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x83\x78\x2A\x00\x74\x2A\x8B\x2A\x2A\x2A\x3B\x41\x2A\x73\x2A\x8D"
+				"linux"		"@_ZN19CServerRemoteAccess10LogCommandEjPKc"
 			}
 		}
 	}
@@ -121,17 +126,46 @@
 	{
 		"#supported"
 		{
-			"engine"	"orangebox"
-			"engine"	"left4dead"
+			"engine"	"left4dead2"
 		}
 		
 		"Signatures"
 		{
+			"WriteDataRequest"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x78\x03\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xFC\x8B\x45\x08"
+				"linux"		"@_ZN19CServerRemoteAccess16WriteDataRequestEP11CRConServerjPKvi"
+			}
+			"CheckPassword"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x14\x53\x56\x8B\x75\x08\x8B\xD9"
+				"linux"		"@_ZN19CServerRemoteAccess13CheckPasswordEP11CRConServerjiPKc"
+			}
+			"Filter_ShouldDiscard"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x51\xA1\x2A\x2A\x2A\x2A\x8B\x40\x30\x85\xC0\x75\x2A\x32\xC0\x8B\xE5\x5D\xC3\x8B\x4D\x08"
+				"linux"		"@_Z20Filter_ShouldDiscardRK8netadr_s"
+			}
+			"IsPassword"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x56\x8D\x71\x40"
+				"linux"		"@_ZNK11CRConServer10IsPasswordEPKc"
+			}
 			"LogCommand"
 			{
 				"library"	"engine"
-				"windows"	"\xA1\x2A\x2A\x2A\x2A\x83\x78\x2A\x00\x74\x2A\x8B\x2A\x2A\x2A\x3B\x41\x2A\x73\x2A\x8D"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\x78\x30\x00\x57"
 				"linux"		"@_ZN19CServerRemoteAccess10LogCommandEjPKc"
+			}
+			"OnSocketClosed"
+			{
+				"library"	"engine"
+				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x10\xC6\x41\x5C\x01"
+				"linux"		"@_ZN11CRConServer14OnSocketClosedEiRK8netadr_sPv"
 			}
 		}
 	}
@@ -140,26 +174,7 @@
 	{
 		"#supported"
 		{
-			"engine"	"left4dead2"
-		}
-		
-		"Signatures"
-		{
-			"LogCommand"
-			{
-				"library"	"engine"
-				"windows"	"\xA1\x2A\x2A\x2A\x2A\x83\x78\x2A\x00\x57\x8B\xF9\x0F\x2A\x2A\x2A\x2A\x2A\x8B"
-				"linux"		"@_ZN19CServerRemoteAccess10LogCommandEjPKc"
-			}
-		}
-	}
-	
-	"#default"
-	{
-		"#supported"
-		{
 			"engine"	"left4dead"
-			"engine"	"left4dead2"
 		}
 		
 		"Signatures"

@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: version
+        run: |
+          base=$(grep -oP 'SMEXT_CONF_VERSION\s+"\K[^"]+' smsdk_config.h)
+          echo "value=${base}.$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: sm${{ matrix.sm.label }}-${{ matrix.target.name }}-${{ matrix.target.arch }}
+    needs: version
+    runs-on: ${{ matrix.target.os }}
+    container: ${{ matrix.target.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        sm:
+          - label: '1.12'
+            branch: '1.12-dev'
+          - label: '1.13'
+            branch: 'master'
+        target:
+          - name: linux
+            os: ubuntu-latest
+            arch: x86
+            container: ghcr.io/alliedmodders/build-containers/debian11-clang22:latest
+          - name: linux
+            os: ubuntu-latest
+            arch: x86_64
+            container: ghcr.io/alliedmodders/build-containers/debian11-clang22:latest
+          - name: windows
+            os: windows-latest
+            arch: x86
+            msvc_arch: x86
+          - name: windows
+            os: windows-latest
+            arch: x86_64
+            msvc_arch: amd64
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v6
+        if: matrix.target.name == 'windows'
+        with:
+          python-version: '3.12'
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: matrix.target.name == 'windows'
+        with:
+          arch: ${{ matrix.target.msvc_arch }}
+      - name: Install AMBuild
+        if: matrix.target.name == 'windows'
+        shell: bash
+        run: python -m pip install --upgrade git+https://github.com/alliedmodders/ambuild.git
+      - name: Clone build dependencies
+        shell: bash
+        run: |
+          git config --global --add safe.directory '*'
+          git clone --depth 1 --recurse-submodules --shallow-submodules -b ${{ matrix.sm.branch }} https://github.com/alliedmodders/sourcemod.git sourcemod
+          git clone --depth 1 --recurse-submodules --shallow-submodules -b ${{ matrix.sm.branch }} https://github.com/alliedmodders/metamod-source.git mmsource
+          mkdir -p dependencies/sourcemod
+          (cd dependencies && ../sourcemod/tools/checkout-deps.sh -s ep2,css,hl2dm,dods,tf2,l4d,l4d2,csgo)
+      - name: Build
+        shell: bash
+        env:
+          CC: clang-22
+          CXX: clang++-22
+        run: |
+          mkdir build && cd build
+          if [ '${{ matrix.target.name }}' = windows ]; then py=python; else py=python3; fi
+          $py ../configure.py \
+            --sm-path ../sourcemod \
+            --mms-path ../mmsource \
+            --hl2sdk-root ../dependencies \
+            --sdks ep2,css,hl2dm,dods,tf2,l4d,l4d2,csgo \
+            --targets ${{ matrix.target.arch }} \
+            --enable-optimize
+          ambuild
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pkg-sm${{ matrix.sm.label }}-${{ matrix.target.name }}-${{ matrix.target.arch }}
+          path: build/package/addons
+          if-no-files-found: error
+
+  release:
+    needs: [version, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+      - id: package
+        run: |
+          version='${{ needs.version.outputs.version }}'
+          assets=''
+          for sm in 1.12 1.13; do
+            for os in windows linux; do
+              dest="package-sm${sm}-${os}/addons"
+              mkdir -p "$dest"
+              for slice in artifacts/pkg-sm${sm}-${os}-*/; do cp -a "${slice}." "$dest/"; done
+              if [ "$os" = windows ]; then
+                asset="SMRCon-${version}-sm${sm}-${os}.zip"
+                (cd "package-sm${sm}-${os}" && zip -r "../$asset" addons)
+              else
+                asset="SMRCon-${version}-sm${sm}-${os}.tar.gz"
+                tar -czf "$asset" -C "package-sm${sm}-${os}" addons
+              fi
+              assets="$assets $asset"
+            done
+          done
+          echo "assets=${assets# }" >> "$GITHUB_OUTPUT"
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ needs.version.outputs.version }}" ${{ steps.package.outputs.assets }} \
+            --target "$GITHUB_SHA" --title "SMRCon ${{ needs.version.outputs.version }}" \
+            --notes "Automated release built from $GITHUB_SHA."

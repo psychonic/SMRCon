@@ -2,41 +2,19 @@
 import os, sys
 
 projectName = 'smrcon'
-
-# smsdk_ext.cpp will be automatically added later
-sourceFiles = [
-  'extension.cpp',
-  'rcon.cpp',
-]
-
-###############
-# Make sure to edit PackageScript, which copies your files to their appropriate locations
-# Simple extensions do not need to modify past this point.
-
+sourceFiles = ['extension.cpp', 'rcon.cpp']
 project = Extension.HL2Project(builder, projectName + '.ext')
 
-# CDetour
-project.sources += [os.path.join(Extension.sm_root, 'public', 'CDetour', 'detours.cpp')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'asm', 'asm.c')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'libudis86', 'decode.c')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'libudis86', 'syn.c')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'libudis86', 'itab.c')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'libudis86', 'syn-intel.c')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'libudis86', 'syn-att.c')]
-project.sources += [os.path.join(Extension.sm_root, 'public', 'libudis86', 'udis86.c')]
-
 if os.path.isfile(os.path.join(builder.currentSourcePath, 'sdk', 'smsdk_ext.cpp')):
-  # Use the copy included in the project
   project.sources += [os.path.join('sdk', 'smsdk_ext.cpp')]
 else:
-  # Use the copy included with SM 1.6 and newer
   project.sources += [os.path.join(Extension.sm_root, 'public', 'smsdk_ext.cpp')]
-
 project.sources += sourceFiles
-  
-for sdk_name in Extension.sdks:
-  sdk = Extension.sdks[sdk_name]
-  
-  binary = Extension.HL2Config(project, projectName + '.ext.' + sdk.ext, sdk)
+
+for target in Extension.sdk_targets:
+  sdk = target.sdk
+  binary = Extension.HL2Config(project, builder, target.cxx,
+                               projectName + '.ext.' + sdk['extension'], sdk)
+  Extension.AddCDetour(binary)
 
 Extension.extensions = builder.Add(project)

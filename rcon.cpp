@@ -172,7 +172,11 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 	// Just because they're authed doesn't mean we'll let them do anything. Pass the info to sp
 	if( g_fwdOnRConCommand->GetFunctionCount() == 0 )
 	{
-		return DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+		bool bWasInRConCommand = g_bInRConCommand;
+		g_bInRConCommand = true;
+		DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
+		g_bInRConCommand = bWasInRConCommand;
+		return;
 	}
 	
 	cell_t allow = 1;
@@ -185,9 +189,10 @@ DETOUR_DECL_MEMBER4(WriteDataRequest, void, void *, pRCon, listenerId_t, id, con
 
 	if (res == Pl_Continue || allow != 0)
 	{
+		bool bWasInRConCommand = g_bInRConCommand;
 		g_bInRConCommand = true;
 		DETOUR_MEMBER_CALL(WriteDataRequest)(pRCon, id, pData, size);
-		g_bInRConCommand = false;
+		g_bInRConCommand = bWasInRConCommand;
 	}
 	else
 	{

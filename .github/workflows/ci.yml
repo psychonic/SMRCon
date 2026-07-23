@@ -70,10 +70,10 @@ jobs:
         shell: bash
         run: |
           git config --global --add safe.directory '*'
-          git clone --depth 1 --recurse-submodules --shallow-submodules -b ${{ matrix.sm.branch }} https://github.com/alliedmodders/sourcemod.git sourcemod
+          git clone --depth 1 --recurse-submodules --shallow-submodules -b ${{ matrix.sm.branch }} https://github.com/alliedmodders/sourcemod.git sm-source
           git clone --depth 1 --recurse-submodules --shallow-submodules -b ${{ matrix.sm.branch }} https://github.com/alliedmodders/metamod-source.git mmsource
           mkdir -p dependencies/sourcemod
-          (cd dependencies && ../sourcemod/tools/checkout-deps.sh -s ep2,css,hl2dm,dods,tf2,l4d,l4d2,csgo)
+          (cd dependencies && ../sm-source/tools/checkout-deps.sh -s orangebox,css,hl2dm,dods,tf2,l4d,l4d2,csgo)
       - name: Build
         shell: bash
         env:
@@ -83,10 +83,10 @@ jobs:
           mkdir build && cd build
           if [ '${{ matrix.target.name }}' = windows ]; then py=python; else py=python3; fi
           $py ../configure.py \
-            --sm-path ../sourcemod \
+            --sm-path ../sm-source \
             --mms-path ../mmsource \
             --hl2sdk-root ../dependencies \
-            --sdks ep2,css,hl2dm,dods,tf2,l4d,l4d2,csgo \
+            --sdks orangebox,css,hl2dm,dods,tf2,l4d,l4d2,csgo \
             --targets ${{ matrix.target.arch }} \
             --enable-optimize
           ambuild

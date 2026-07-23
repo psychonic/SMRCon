@@ -8,6 +8,7 @@ builder.SetBuildFolder('package')
 # Add any folders you need to this list
 folder_list = [
   'addons/sourcemod/extensions',
+  'addons/sourcemod/extensions/x64',
   'addons/sourcemod/scripting/include',
   'addons/sourcemod/gamedata',
   #'addons/sourcemod/configs',
@@ -28,7 +29,7 @@ def CopyFiles(src, dest, files):
     source_path = os.path.join(builder.sourcePath, src, source_file)
     builder.AddCopy(source_path, dest_entry)
 
-# Include files 
+# Include files
 CopyFiles('sourcemod/scripting/include', 'addons/sourcemod/scripting/include',
   [ 'smrcon.inc', ]
 )
@@ -47,4 +48,5 @@ CopyFiles('sourcemod/gamedata', 'addons/sourcemod/gamedata',
 
 # Copy binaries.
 for cxx_task in Extension.extensions:
-  builder.AddCopy(cxx_task.binary, folder_map['addons/sourcemod/extensions'])
+  ext_folder = 'addons/sourcemod/extensions/x64' if cxx_task.target.arch == 'x86_64' else 'addons/sourcemod/extensions'
+  builder.AddCopy(cxx_task.binary, folder_map[ext_folder])

@@ -76,17 +76,19 @@ jobs:
           (cd dependencies && ../sm-source/tools/checkout-deps.sh -s orangebox,css,hl2dm,dods,tf2,l4d,l4d2,csgo)
       - name: Build
         shell: bash
-        env:
-          CC: clang-22
-          CXX: clang++-22
         run: |
           mkdir build && cd build
-          if [ '${{ matrix.target.name }}' = windows ]; then py=python; else py=python3; fi
+          if [ '${{ matrix.target.name }}' = windows ]; then
+            py=python
+          else
+            py=python3
+            export CC=clang-22 CXX=clang++-22
+          fi
           $py ../configure.py \
             --sm-path ../sm-source \
             --mms-path ../mmsource \
             --hl2sdk-root ../dependencies \
-            --sdks orangebox,css,hl2dm,dods,tf2,l4d,l4d2,csgo \
+            --sdks=present \
             --targets ${{ matrix.target.arch }} \
             --enable-optimize
           ambuild

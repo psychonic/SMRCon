@@ -83,7 +83,7 @@ class ExtensionConfig(object):
         raise Exception('Unknown target architecture: {}'.format(cxx.target.arch))
       if cxx.like('gcc'):
         cxx.defines += ['stricmp=strcasecmp', '_stricmp=strcasecmp', '_snprintf=snprintf', '_vsnprintf=vsnprintf', 'HAVE_STDINT_H', 'GNUC']
-        cxx.cflags += ['-pipe', '-fno-strict-aliasing', '-Wall', '-Werror', '-Wno-unused', '-Wno-switch', '-Wno-array-bounds', '-fvisibility=hidden', '-fno-omit-frame-pointer']
+        cxx.cflags += ['-pipe', '-fno-strict-aliasing', '-Wall', '-Werror', '-Wno-unused', '-Wno-switch', '-Wno-array-bounds', '-Wno-implicit-const-int-float-conversion', '-Wno-expansion-to-defined', '-fvisibility=hidden', '-fno-omit-frame-pointer']
         cxx.cxxflags += ['-std=c++17', '-fno-exceptions', '-fno-threadsafe-statics', '-Wno-non-virtual-dtor', '-Wno-overloaded-virtual', '-Wno-register', '-fvisibility-inlines-hidden']
         if cxx.target.arch == 'x86':
           cxx.cflags += ['-m32', '-msse']
